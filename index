@@ -1,0 +1,181 @@
+{
+  "name": "My workflow 6",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "8d5b4044-b7f5-474e-a1b0-ec6848297f58",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8f08a9ef-c8a7-4994-a773-9bb30dfd8a2e",
+      "name": "Webhook",
+      "webhookId": "8d5b4044-b7f5-474e-a1b0-ec6848297f58"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é um assistente de CRM. Um novo cliente acabou de se cadastrar pelo formulário.\n\nCrie um email de boas-vindas personalizado em português brasileiro para:\n\nNome: {{ $json.body.form_response.answers[0].text }}\nEmail: {{ $json.body.form_response.answers[1].email }}\n\nO email deve:\n- Cumprimentar pelo nome\n- Agradecer pelo cadastro\n- Ter um tom amigável e profissional\n- Ter no máximo 150 palavras",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        208,
+        0
+      ],
+      "id": "cbdb562a-dbb7-4084-ae58-a9aebf37bd0f",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        496,
+        16
+      ],
+      "id": "63aac1d0-245a-4724-819f-6197f3b17db4",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "haZVJUMTWjgA05BH",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook').item.json.body.form_response.answers.find(a => a.type === 'email').email }}",
+        "subject": "Bem-vindo(a)!",
+        "message": "={{ $('Basic LLM Chain').item.json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        608,
+        48
+      ],
+      "id": "dd750a7e-234d-44ba-910f-05cab20a2660",
+      "name": "Send a message",
+      "webhookId": "113d6d11-723b-4d82-92b9-07bc362ef6ac",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zAFNIXmfUGanbQHy",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        144,
+        208
+      ],
+      "id": "80e697d0-6395-49ae-9e6d-aa4c94b5b93a",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "haZVJUMTWjgA05BH",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "joaopedrosilvadossantos94@gmail.com",
+        "subject": "Novo cadastro recebido!",
+        "message": "={{ $('Webhook').item.json.body.form_response.answers[0].email }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        720,
+        48
+      ],
+      "id": "427a43f3-b024-44c1-bc88-289b981165b8",
+      "name": "Send a message1",
+      "webhookId": "7ce9f949-baa0-4825-88a8-756d0a1fc6af",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zAFNIXmfUGanbQHy",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c12b37d3-3c48-4935-b360-9afa68696ae8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "73278b622c4b072943414a2c7eb6850b5bb4c501ed978e83da694edab81b0d08"
+  },
+  "id": "NHJjNrwAteYZhL6k",
+  "tags": []
+}
